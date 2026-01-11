@@ -1,0 +1,28 @@
+{
+  "tables": {
+    "sales": {
+      "columns": [
+        "order_id",
+        "customer_id",
+        "product",
+        "region",
+        "channel",
+        "order_date",
+        "year",
+        "revenue"
+      ]
+    },
+    "sales_orders": {
+      "columns": [
+        "order_id",
+        "customer_id",
+        "product",
+        "region",
+        "channel",
+        "order_date",
+        "year",
+        "revenue"
+      ]
+    }
+  }
+}
