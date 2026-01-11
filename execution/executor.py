@@ -83,7 +83,11 @@ def _apply_filters(rows, filters):
     for key, value in filters.items():
         if key in {"month", "month_start", "month_end", "last_months"}:
             continue
-        rows = [row for row in rows if row.get(key) == value]
+        if isinstance(value, (list, tuple)):
+            allowed = {str(item) for item in value}
+            rows = [row for row in rows if str(row.get(key)) in allowed]
+        else:
+            rows = [row for row in rows if row.get(key) == value]
 
     rows = _apply_month_filter(rows, filters)
     return _apply_relative_month_filter(rows, filters)

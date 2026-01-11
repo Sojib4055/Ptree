@@ -50,7 +50,12 @@ def _format_filters(filters):
             range_text += f" {year}"
         phrases.append(range_text)
     elif year:
-        phrases.append(f"in {year}")
+        if isinstance(year, (list, tuple)):
+            year_list = [str(item) for item in year]
+            year_text = " and ".join(year_list)
+            phrases.append(f"in {year_text}")
+        else:
+            phrases.append(f"in {year}")
 
     other_keys = ["region", "channel", "product", "customer_id"]
     other_filters = [f"{key}={filters[key]}" for key in other_keys if key in filters]

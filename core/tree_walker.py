@@ -91,6 +91,18 @@ def _infer_filter_from_value(value):
     return None, None
 
 
+def _add_filter(filters, key, value):
+    if key in filters:
+        current = filters[key]
+        if isinstance(current, list):
+            if value not in current:
+                current.append(value)
+        elif current != value:
+            filters[key] = [current, value]
+    else:
+        filters[key] = value
+
+
 def _infer_metric_from_tokens(doc):
     for token in doc:
         lemma = token.lemma_.lower()
@@ -166,19 +178,25 @@ def walk(doc):
         if token.dep_ == "dobj":
             metric_token = token
         if token.dep_ == "pobj" and token.head.text in PREP_TRIGGERS:
-            phrase = _token_phrase(token)
-            key, value = _infer_filter_from_value(phrase)
-            if key == "month":
-                months.append(value)
-            elif key:
-                filters[key] = value
+            tokens = [token] + list(token.conjuncts)
+            for item in tokens:
+                phrase = _token_phrase(item)
+                key, value = _infer_filter_from_value(phrase)
+                if key == "month":
+                    months.append(value)
+                elif key:
+                    _add_filter(filters, key, value)
         if token.like_num and token.text.isdigit() and len(token.text) == 4:
             year_tokens.append(token.text)
         if lemma in MONTH_MAP:
             months.append(MONTH_MAP[lemma])
 
     if "year" not in filters and year_tokens:
-        filters["year"] = year_tokens[-1]
+        for year in year_tokens:
+            _add_filter(filters, "year", year)
+    elif year_tokens:
+        for year in year_tokens:
+            _add_filter(filters, "year", year)
 
     if months:
         month_min = min(months)
